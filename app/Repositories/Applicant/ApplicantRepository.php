@@ -4,6 +4,7 @@ namespace App\Repositories\Applicant;
 use File;
 use config;
 use ZipArchive;
+use Carbon\Carbon;
 use App\Models\Heading;
 use App\Models\Template;
 use App\Models\Applicant;
@@ -114,18 +115,17 @@ class ApplicantRepository implements ApplicantRepositoryInterface
     {
         $otp=$request->passcode;
         $email=request()->email;
+        $now = Carbon::now();
         $emailPasscode=DB::table('email_passcode') #check email_passcode in `email_passcode` in table
             ->where('email','=',$email)
             ->where('passcode',$otp)
-            ->exists();
-        if($emailPasscode){ #check email and passcode
-            $emailPasscode_id=DB::table('email_passcode')->where('email','=',$email)->value('id');
-            $deleteEmailPasscode = new DeleteEmailPasscode($emailPasscode_id);
-            $deleteEmailPasscode->executeProcess();
-            return ['status'=>true];
-        }else{
-            return  ['status'=>false];
-        }
+            ->first();
+        if(!$emailPasscode) return ['status'=>false, 'message'=>'SE013'];// invalid email passcode
+        if($emailPasscode && $now->isAfter($emailPasscode->passcode_duration)) return ['status'=>false, 'message'=>'SE133'];// passcode duration expired
+        $emailPasscodeId=DB::table('email_passcode')->where('email','=',$email)->value('id');
+        $deleteEmailPasscode = new DeleteEmailPasscode($emailPasscodeId);
+        $deleteEmailPasscode->executeProcess();
+        return ['status'=>true];
     }
 
     /**

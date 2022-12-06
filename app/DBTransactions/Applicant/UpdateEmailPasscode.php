@@ -2,6 +2,7 @@
 
 namespace App\DBTransactions\Applicant;
 
+use Carbon\Carbon;
 use App\Classes\DBTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -37,7 +38,7 @@ class UpdateEmailPasscode extends DBTransaction
         $passcode=$this->request['passcode'];
         $update=DB::table('email_passcode')
               ->where('id', $id)
-              ->update(['passcode' => $passcode]);
+              ->update(['passcode' => $passcode,'passcode_duration'=>Carbon::now()->addMinutes(config('ONE'))]);
         if (!$update) { #this row is updated or not
             return ['status' => false, 'error' => 'Update Failed!'];
         }

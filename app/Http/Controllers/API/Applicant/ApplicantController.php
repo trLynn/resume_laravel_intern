@@ -183,7 +183,7 @@ use App\Interfaces\Applicant\ApplicantRepositoryInterface;
         if($otp['status']){ #valid passcode or not
             return $this->msgHelpUtil->successMessage('successMessage.SS013',config('HTTP_CODE_200'));
         }else{
-            return $this->msgHelpUtil->errorMessage('errorMessage.SE013',config('HTTP_CODE_200'));
+            return $this->msgHelpUtil->errorMessage('errorMessage.'.$otp['message'],config('HTTP_CODE_200'));
         }
     }
 

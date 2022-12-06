@@ -55,7 +55,8 @@ return [
     'SE129'=> "Text boxes are excepted to write 255 characters.",
     'SE130'=> "Maximum Attachment file is 10.",
     'SE131'=> "You've already filled this form!",
-    'SE132'=> "Profile Image is large!"
+    'SE132'=> "Profile Image is large!",
+    'SE133'=> "This passcode is expired!Please click Resend button.",
 ];
 
 

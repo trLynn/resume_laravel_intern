@@ -2,6 +2,7 @@
 
 namespace App\DBTransactions\Applicant;
 
+use Carbon\Carbon;
 use App\Classes\DBTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +36,7 @@ class SaveEmailPasscode extends DBTransaction
     {
         $email=$this->request['email'];
         $passcode=$this->request['passcode'];
-        DB::table('email_passcode')->insert(['email'=>$email,'passcode'=>$passcode]);
+        DB::table('email_passcode')->insert(['email'=>$email,'passcode'=>$passcode,'passcode_duration'=>Carbon::now()->addMinutes(config('ONE'))]);
         return ['status' => true, 'error' => ''];
     }
 }
