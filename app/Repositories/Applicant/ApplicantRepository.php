@@ -649,29 +649,46 @@ class ApplicantRepository implements ApplicantRepositoryInterface
                 elseif($status == config('FOUR')){ #Success status can only be changed to reject status
                     if(in_array(config('ONE'),$applicantsStatus) || in_array(config('TWO'),$applicantsStatus) || in_array(config('FOUR'),$applicantsStatus)){
                         return [false,'change_success_error']; #Processing and Fail can be changed to Success status
-                    }
-                    $mailData = [];
-                    // //$mailData['mail_to_receipts'] = $toEmail;
-                    // $mailData['subject'] = 'Send resume passcode';
-                    // $mailData['title'] = 'Mr/Ms';
-                    // //$mailData['body_message'] = $otp;
-                    // $mailData['template'] = 'mail_template';
-                    // $mailData['form'] = 'resume applicant login form';
-                    // $mailData['op_flag'] = config("SAVE");
-                    // $mailData['device_flag'] = config("WEB");
-                    // $message = $this->sendMail($mailData);
-                    // $mailResArr = json_decode($message->getContent(), true);
-                    // //send mail is error have or not
-                    // if($mailResArr['status'] == "NG"){
-                    //     $mailError = $mailResArr['message'];
-                    //     return ['status'=>false,'data'=>$mailError];
-                    // }
+                    }   
                 }
                 elseif($status == config('FIVE')){ #Fail status can only be changed to success status
                     if(in_array(config('ONE'),$applicantsStatus) || in_array(config('TWO'),$applicantsStatus) || in_array(config('FOUR'),$applicantsStatus) || in_array(config('FIVE'),$applicantsStatus)){
                         return [false,'change_fail_error']; #Processing can only be changed to Fail status
                     }
                 }
+                foreach($applicantId as $applicantIds){
+                    $applicantEmail = Applicant::where('id',$applicantIds)->value('email');
+                $jobTitle = TemplateApplicant::leftJoin('templates','templates.id','template_applicant.template_id')
+                    ->where('template_applicant.applicant_id',$applicantIds)
+                    ->value('templates.name');
+                    Log::info($applicantIds);
+                    Log::info($status);
+                if($status == config('FOUR') || $status == config('FIVE')){
+                    
+                    $mailData = [];
+                    $mailData['mail_to_receipts'] = $applicantEmail;
+                    $mailData['subject'] = 'Send Job Result';
+                    $mailData['title'] = 'Mr/Ms';
+                    $mailData['job_title'] = $jobTitle;
+                    if($status == config('FOUR')){
+                        $mailData['template'] = 'pass';
+                    }
+                    if($status == config('FIVE')){
+                        $mailData['template'] = 'fail';
+                    }
+                    $mailData['form'] = 'pass or fail result form';
+                    $mailData['op_flag'] = config("SAVE");
+                    $mailData['device_flag'] = config("WEB");
+                    $message = $this->sendMail($mailData);
+                    $mailResArr = json_decode($message->getContent(), true);
+                    //send mail is error have or not
+                    if($mailResArr['status'] == "NG"){
+                        $mailError = $mailResArr['message'];
+                        return ['status'=>false,'data'=>$mailError];
+                    }
+                }
+                }
+                
                 TemplateApplicant::
                 whereIn("template_applicant.applicant_id",$applicantId)
                 ->update(["status"=> $status]);
